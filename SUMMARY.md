@@ -57,7 +57,8 @@ Client ──[POST /execute]──► FastAPI ──[Queue Task]──► Redis 
 
 **Terminal 1 - Redis:**
 ```bash
-docker-compose up -d
+sudo apt install redis
+redis-sever &
 ```
 
 **Terminal 2 - FastAPI Server:**

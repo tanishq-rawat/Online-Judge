@@ -23,12 +23,8 @@ pip install -r requirements.txt
 
 Using Docker:
 ```bash
-docker-compose up -d
-```
-
-Or install Redis locally and start it:
-```bash
-redis-server
+sudo apt install redis
+redis-sever &
 ```
 
 ### 3. Build Docker Image for Code Execution
