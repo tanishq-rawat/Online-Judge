@@ -1,5 +1,5 @@
-from celery_app import celery_app
-from executor import SandboxExecutor
+from tasks.celery_app import celery_application
+from app.services.executor import SandboxExecutor
 import redis
 import json
 import os
@@ -8,7 +8,7 @@ import os
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 redis_client = redis.from_url(REDIS_URL)
 
-@celery_app.task(name="tasks.execute_code")
+@celery_application.task(name="tasks.execute_code")
 def execute_code(submission_id: str, source_code: str, stdin_data: str, 
                  time_limit_sec: float, memory_limit_mb: int, cpu_cores: float):
     """
@@ -36,9 +36,9 @@ def execute_code(submission_id: str, source_code: str, stdin_data: str,
             memory_limit_mb=memory_limit_mb,
             cpu_cores=cpu_cores,
         )
-        
+        print("Running code execution task for submission:", submission_id)
         result = executor.run(source_code=source_code, stdin_data=stdin_data)
-        
+        print("Result: ", result)
         # Store result in Redis
         execution_result = {
             "submission_id": submission_id,

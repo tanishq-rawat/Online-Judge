@@ -1,15 +1,16 @@
-from fastapi import FastAPI, status, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-import redis
 import json
 import uuid
 import os
-
-from models import CodeSubmission, SubmissionResponse, ExecutionResult
-from tasks import execute_code
+from fastapi import FastAPI, status, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+import redis
+from app.api.routes import api_router
+from app.models import CodeSubmission, SubmissionResponse, ExecutionResult
+from tasks.tasks import execute_code
 
 app = FastAPI(title="Online Judge API", version="1.0.0")
 
+app.include_router(api_router)
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,

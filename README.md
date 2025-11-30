@@ -30,7 +30,7 @@ redis-sever &
 ### 3. Build Docker Image for Code Execution
 
 ```bash
-cd python-oj
+cd docker/python-runtime
 docker build -t oj-python-runner .
 cd ..
 ```

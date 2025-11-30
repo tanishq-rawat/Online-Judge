@@ -3,16 +3,18 @@ import os
 
 # Redis configuration
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+print("Celery Redis URL:", REDIS_URL)
 
 # Create Celery app
-celery_app = Celery(
+celery_application = Celery(
     "online_judge",
     broker=REDIS_URL,
     backend=REDIS_URL,
     include=["tasks"]  # Auto-discover tasks from tasks.py
 )
 
-celery_app.conf.update(
+celery_application.conf.update(
+    imports=['tasks.tasks'],
     task_serializer="json",
     accept_content=["json"],
     result_serializer="json",
