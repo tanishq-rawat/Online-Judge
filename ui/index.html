@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Code Judge</title>
+    
+    <!-- CodeMirror CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        label {
+            font-weight: bold;
+            color: #555;
+        }
+        
+        select {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .editor-container {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .CodeMirror {
+            height: 400px;
+            font-size: 14px;
+        }
+        
+        .input-section {
+            margin-bottom: 20px;
+        }
+        
+        .input-section label {
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            resize: vertical;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            padding: 10px 25px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .submit-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .submit-btn:hover {
+            background-color: #45a049;
+        }
+        
+        .clear-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .clear-btn:hover {
+            background-color: #da190b;
+        }
+        
+        .output-section {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            min-height: 100px;
+        }
+        
+        .output-section h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .output-content {
+            font-family: monospace;
+            white-space: pre-wrap;
+            background-color: #000;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 4px;
+            min-height: 60px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Online Code Judge</h1>
+        
+        <div class="controls">
+            <label for="language">Select Language:</label>
+            <select id="language">
+                <option value="cpp">C++</option>
+                <option value="python">Python</option>
+                <option value="nodejs">Node.js</option>
+            </select>
+        </div>
+        
+        <div class="editor-container">
+            <textarea id="code-editor"></textarea>
+        </div>
+        
+        <div class="input-section">
+            <label for="input">Input (Optional):</label>
+            <textarea id="input" rows="4" placeholder="Enter input for your program..."></textarea>
+        </div>
+        
+        <div class="button-group">
+            <button class="submit-btn" id="submit-btn">Submit Code</button>
+            <button class="clear-btn" id="clear-btn">Clear</button>
+        </div>
+        
+        <div class="output-section">
+            <h3>Output:</h3>
+            <div class="output-content" id="output">No output yet...</div>
+        </div>
+    </div>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- CodeMirror JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    
+    <script>
+        // Initialize CodeMirror
+        let editor = CodeMirror.fromTextArea(document.getElementById('code-editor'), {
+            lineNumbers: true,
+            mode: 'text/x-c++src',
+            theme: 'monokai',
+            indentUnit: 4,
+            tabSize: 4,
+            indentWithTabs: false,
+            lineWrapping: true
+        });
+        
+        // Default code templates
+        const codeTemplates = {
+            cpp: `#include <iostream>
+using namespace std;
+
+int main() {
+    cout << "Hello, World!" << endl;
+    return 0;
+}`,
+            python: `# Write your Python code here
+print("Hello, World!")`,
+            nodejs: `// Write your Node.js code here
+console.log("Hello, World!");`
+        };
+        
+        // Mode mapping for CodeMirror
+        const modeMappings = {
+            cpp: 'text/x-c++src',
+            python: 'text/x-python',
+            nodejs: 'text/javascript'
+        };
+        
+        // Set default code
+        editor.setValue(codeTemplates.cpp);
+        
+        // Language change handler
+        $('#language').on('change', function() {
+            const language = $(this).val();
+            editor.setOption('mode', modeMappings[language]);
+            editor.setValue(codeTemplates[language]);
+        });
+        
+        // Backend API base URL
+        const API_BASE_URL = 'http://localhost:8000';
+        
+        // Polling interval reference
+        let pollInterval = null;
+        
+        // Function to poll for results
+        function pollForResult(submissionId) {
+            pollInterval = setInterval(function() {
+                $.ajax({
+                    url: API_BASE_URL + '/result/' + submissionId,
+                    method: 'GET',
+                    success: function(response) {
+                        // If still processing, keep polling
+                        if (response.status === 'PROCESSING' || response.status === 'PENDING') {
+                            $('#output').text('Status: ' + response.status + '\nExecuting your code...');
+                            return;
+                        }
+                        
+                        // Check if we have a valid response with final status
+                        if (response.status) {
+                            clearInterval(pollInterval);
+                            pollInterval = null;
+                            $('#submit-btn').prop('disabled', false).text('Submit Code');
+                            
+                            // Status messages
+                            const statusMessages = {
+                                'OK': '✓ Execution Successful',
+                                'TLE': '⏱ Time Limit Exceeded',
+                                'MLE': '💾 Memory Limit Exceeded',
+                                'RE': '💥 Runtime Error',
+                                'CE': '⚠ Compilation Error'
+                            };
+                            
+                            // Build output string
+                            let output = '';
+                            output += 'Status: ' + (statusMessages[response.status] || response.status) + '\n';
+                            output += 'Time: ' + (response.time_sec !== null ? response.time_sec + 's' : 'N/A') + '\n';
+                            output += 'Exit Code: ' + (response.exit_code !== null ? response.exit_code : 'N/A') + '\n';
+                            output += '─────────────────────────────\n';
+                            
+                            // Handle TLE specifically
+                            if (response.status === 'TLE') {
+                                output += 'Your code exceeded the time limit.';
+                            } else if (response.stdout) {
+                                output += response.stdout;
+                            }
+                            
+                            if (response.stderr) {
+                                output += '\n[stderr]\n' + response.stderr;
+                            }
+                            
+                            if (response.status !== 'TLE' && !response.stdout && !response.stderr) {
+                                output += 'No output';
+                            }
+                            
+                            $('#output').text(output);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        // If 404, result not ready yet, keep polling
+                        if (xhr.status === 404) {
+                            $('#output').text('Waiting for result...\nPolling...');
+                            return;
+                        }
+                        clearInterval(pollInterval);
+                        pollInterval = null;
+                        $('#submit-btn').prop('disabled', false).text('Submit Code');
+                        $('#output').text('Error checking status: ' + error);
+                    }
+                });
+            }, 1000); // Poll every 1 second
+        }
+        
+        // Submit button handler
+        $('#submit-btn').on('click', function() {
+            const code = editor.getValue();
+            const language = $('#language').val();
+            const input = $('#input').val();
+            
+            // Validate code
+            if (!code.trim()) {
+                $('#output').text('Error: Please write some code!');
+                return;
+            }
+            
+            // Clear any existing poll
+            if (pollInterval) {
+                clearInterval(pollInterval);
+                pollInterval = null;
+            }
+            
+            // Disable button and show loading
+            $('#submit-btn').prop('disabled', true).text('Submitting...');
+            $('#output').text('Submitting code...');
+            
+            // Submit code to API
+            $.ajax({
+                url: API_BASE_URL + '/execute',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    source_code: code,
+                }),
+                success: function(response) {
+                    const submissionId = response.submission_id;
+                    $('#output').text('Submitted! ID: ' + submissionId + '\nWaiting for result...');
+                    
+                    // Start polling for result
+                    pollForResult(submissionId);
+                },
+                error: function(xhr, status, error) {
+                    $('#submit-btn').prop('disabled', false).text('Submit Code');
+                    $('#output').text('Submission failed: ' + error);
+                }
+            });
+        });
+        
+        // Clear button handler
+        $('#clear-btn').on('click', function() {
+            const language = $('#language').val();
+            editor.setValue(codeTemplates[language]);
+            $('#input').val('');
+            $('#output').text('No output yet...');
+        });
+    </script>
+</body>
+</html>
