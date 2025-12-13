@@ -35,9 +35,17 @@ class SandboxExecutor:
 
         with tempfile.TemporaryDirectory() as tmpdir:
             code_path = os.path.join(tmpdir, "main.py")
+            input_path = os.path.join(tmpdir, "input.txt")
 
             with open(code_path, "w", encoding="utf-8") as f:
                 f.write(source_code)
+
+            # Write stdin data to a file
+            with open(input_path, "w", encoding="utf-8") as f:
+                # Ensure input ends with newline
+                if stdin_data and not stdin_data.endswith('\n'):
+                    stdin_data += '\n'
+                f.write(stdin_data)
 
             volumes = {
                 tmpdir: {
@@ -46,7 +54,8 @@ class SandboxExecutor:
                 }
             }
 
-            command = ["python", "main.py"]
+            # Use shell redirection to feed input
+            command = ["sh", "-c", "python main.py < input.txt"]
 
             mem_limit = f"{self.memory_limit_mb}m"
             nano_cpus = int(self.cpu_cores * 1_000_000_000)
@@ -64,17 +73,10 @@ class SandboxExecutor:
                     mem_limit=mem_limit,
                     nano_cpus=nano_cpus,
                     detach=True,
-                    stdin_open=True,
                     stdout=True,
                     stderr=True,
                     tty=False,
                 )
-
-                # ❗ Send input directly to container STDIN
-                if stdin_data:
-                    sock = container.attach_socket(params={"stdin": 1, "stream": 1})
-                    sock._sock.send(stdin_data.encode())
-                    sock._sock.close()
 
                 # Poll container status
                 while True:
@@ -96,14 +98,15 @@ class SandboxExecutor:
                     time.sleep(0.05)
 
                 exit_code = state["ExitCode"]
-                logs = container.logs().decode("utf-8", "replace")
+                stdout_logs = container.logs(stdout=True, stderr=False).decode("utf-8", "replace")
+                stderr_logs = container.logs(stdout=False, stderr=True).decode("utf-8", "replace")
 
                 status = "OK" if exit_code == 0 else "RE"
 
                 return {
                     "status": status,
-                    "stdout": logs,
-                    "stderr": "",
+                    "stdout": stdout_logs,
+                    "stderr": stderr_logs,
                     "exit_code": exit_code,
                     "time_sec": round(time.time() - start_time, 4),
                 }

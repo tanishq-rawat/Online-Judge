@@ -327,7 +327,10 @@ console.log("Hello, World!");`
             // Disable button and show loading
             $('#submit-btn').prop('disabled', true).text('Submitting...');
             $('#output').text('Submitting code...');
-            
+            // alert(JSON.stringify({
+            //         source_code: code,
+            //         stdin_data: input,
+            //     }));
             // Submit code to API
             $.ajax({
                 url: API_BASE_URL + '/execute',
@@ -335,6 +338,7 @@ console.log("Hello, World!");`
                 contentType: 'application/json',
                 data: JSON.stringify({
                     source_code: code,
+                    stdin_data: input,
                 }),
                 success: function(response) {
                     const submissionId = response.submission_id;
