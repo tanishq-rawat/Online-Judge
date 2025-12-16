@@ -202,15 +202,24 @@
         
         // Default code templates
         const codeTemplates = {
-            cpp: `#include <iostream>
+            cpp: `#include <bits/stdc++.h>
 using namespace std;
-
-int main() {
-    cout << "Hello, World!" << endl;
+// Program to find frequency of elements in an array
+int main() 
+{
+    vector<int> v ={1,5,3,6,8,9,2,5,3,5,6,7,2,2,5,6,4,7,8,3};
+    map<int,int> mp;
+    for(int e:v) mp[e]++;
+    for(auto it: mp)
+    {
+        cout<<it.first<<" "<<it.second<<endl;
+    }
     return 0;
 }`,
             python: `# Write your Python code here
-print("Hello, World!")`,
+cube = lambda x:x**3
+
+print(cube(4))`,
             nodejs: `// Write your Node.js code here
 console.log("Hello, World!");`
         };
@@ -339,6 +348,7 @@ console.log("Hello, World!");`
                 data: JSON.stringify({
                     source_code: code,
                     stdin_data: input,
+                    lang: language,
                 }),
                 success: function(response) {
                     const submissionId = response.submission_id;

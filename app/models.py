@@ -7,6 +7,7 @@ class CodeSubmission(BaseModel):
     time_limit_sec: float = 2.0
     memory_limit_mb: int = 256
     cpu_cores: float = 1.0
+    lang: str = "python"
 
 class SubmissionResponse(BaseModel):
     submission_id: str
@@ -14,7 +15,7 @@ class SubmissionResponse(BaseModel):
 
 class ExecutionResult(BaseModel):
     submission_id: str
-    status: Literal["PENDING", "PROCESSING", "OK", "TLE", "RE", "INTERNAL_ERROR"]
+    status: Literal["PENDING", "PROCESSING", "OK", "TLE", "RE", "INTERNAL_ERROR","CE"]
     stdout: Optional[str] = None
     stderr: Optional[str] = None
     exit_code: Optional[int] = None

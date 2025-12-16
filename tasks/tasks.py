@@ -1,5 +1,5 @@
 from tasks.celery_app import celery_application
-from app.services.executor import SandboxExecutor
+from app.services.executor import PySandboxExecutor, CppSandboxExecutor
 import redis
 import json
 import os
@@ -10,7 +10,7 @@ redis_client = redis.from_url(REDIS_URL)
 
 @celery_application.task(name="tasks.execute_code")
 def execute_code(submission_id: str, source_code: str, stdin_data: str, 
-                 time_limit_sec: float, memory_limit_mb: int, cpu_cores: float):
+                 time_limit_sec: float, memory_limit_mb: int, cpu_cores: float, lang: str):
     """
     Background task to execute user code in sandbox
     """
@@ -30,12 +30,21 @@ def execute_code(submission_id: str, source_code: str, stdin_data: str,
         )
         
         # Execute code
-        executor = SandboxExecutor(
-            image="oj-python-runner",
-            time_limit_sec=time_limit_sec,
-            memory_limit_mb=memory_limit_mb,
-            cpu_cores=cpu_cores,
-        )
+        print("Executing code for lang:", lang)
+        if lang == "python":
+            executor = PySandboxExecutor(
+                image="oj-python-runner",
+                time_limit_sec=time_limit_sec,
+                memory_limit_mb=memory_limit_mb,
+                cpu_cores=cpu_cores,
+            )
+        else:
+            executor = CppSandboxExecutor(
+                image="oj-cpp-runner",
+                time_limit_sec=time_limit_sec,
+                memory_limit_mb=memory_limit_mb,
+                cpu_cores=cpu_cores,
+            )
         print("Running code execution task for submission:", submission_id)
         result = executor.run(source_code=source_code, stdin_data=stdin_data)
         print("Result: ", result)

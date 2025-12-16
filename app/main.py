@@ -42,6 +42,7 @@ def submit_code(submission: CodeSubmission):
     # Store initial status in Redis
     initial_result = {
         "submission_id": submission_id,
+        "lang": submission.lang,
         "status": "PENDING",
         "stdout": None,
         "stderr": None,
@@ -63,6 +64,7 @@ def submit_code(submission: CodeSubmission):
         time_limit_sec=submission.time_limit_sec,
         memory_limit_mb=submission.memory_limit_mb,
         cpu_cores=submission.cpu_cores,
+        lang=submission.lang
     )
     
     return SubmissionResponse(
